@@ -1,0 +1,7 @@
+<?php
+//require_once('src/ProfilePicGenerator.php');
+echo phpinfo();die();
+//$profilePic = new ProfilePicGenerator("pics", null, 70, 70);
+
+//var_dump($profilePic->getDefaultHeight());
+
