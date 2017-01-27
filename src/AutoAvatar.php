@@ -1,6 +1,8 @@
 <?php
-
-class ProfilePicGenerator
+/** 
+ * 
+ */
+class AutoAvatar
 {
     private $default_path;
     
@@ -21,7 +23,7 @@ class ProfilePicGenerator
     
     private $default_text_size;
     
-    public function __construct(string $defaultPath = null, array $colourArray = [], array $textColourArray = [], int $defaultWidth = 70, int $defaultHeight = 70, int $defaultTextSize = 30, string $defaultFont = '')
+    public function __construct(string $defaultPath, array $colourArray = [], array $textColourArray = [], int $defaultWidth = 70, int $defaultHeight = 70, int $defaultTextSize = 30, string $defaultFont = '')
     {
         $this->default_path = $defaultPath;
         $this->default_width = $defaultWidth;
@@ -32,6 +34,18 @@ class ProfilePicGenerator
         $this->default_text_size = $defaultTextSize;
     }
  
+    /** 
+     * Saves image to the path configured in constructor.
+     * 
+     * @param string $fileName
+     * @param string $text
+     * @param string $colourOverride
+     * @param string $textColourOverride
+     * @param int $widthOverride
+     * @param int $heightOverride
+     * @param int $textSizeOverride
+     * @param string $fontOverride
+     */
     public function generateNewImage(string $fileName, string $text, string $colourOverride = '', string $textColourOverride = '', int $widthOverride = 0, int $heightOverride = 0, int $textSizeOverride = 0, string $fontOverride = '')
     {
         try {

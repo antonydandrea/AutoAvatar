@@ -1,5 +1,5 @@
 <?php
-require_once('src/ProfilePicGenerator.php');
+require_once('src/AutoAvatar.php');
 
 $colourArray = [
     '#00BE4B',
@@ -15,6 +15,6 @@ $colourArray = [
     '#CD3700',
 ];
 
-$profilePic = new ProfilePicGenerator("pics", $colourArray, ['#FFF'], 70, 70, 30, realpath("Replica-Regular.ttf"));
+$profilePic = new AutoAvatar("pics", $colourArray, ['#FFF'], 70, 70, 30, realpath("Replica-Regular.ttf"));
 $profilePic->generateNewImage(time().'.png', 'A');
 
