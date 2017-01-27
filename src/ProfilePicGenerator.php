@@ -17,16 +17,22 @@ class ProfilePicGenerator
     
     private $text_colour_array;
     
-    public function __construct(string $defaultPath = null, array $colourArray = [], array $textColourArray = [], int $defaultWidth = 70, int $defaultHeight = 70)
+    private $default_font;
+    
+    private $default_text_size;
+    
+    public function __construct(string $defaultPath = null, array $colourArray = [], array $textColourArray = [], int $defaultWidth = 70, int $defaultHeight = 70, int $defaultTextSize = 30, string $defaultFont = '')
     {
         $this->default_path = $defaultPath;
         $this->default_width = $defaultWidth;
         $this->default_height = $defaultHeight;
         $this->colour_array = $colourArray;
         $this->text_colour_array = $textColourArray;
+        $this->default_font = $defaultFont;
+        $this->default_text_size = $defaultTextSize;
     }
  
-    public function generateNewImage(string $fileName, string $text, string $colourOverride = '', string $textColourOverride = '', int $widthOverride = 0, $heightOverride = 0)
+    public function generateNewImage(string $fileName, string $text, string $colourOverride = '', string $textColourOverride = '', int $widthOverride = 0, int $heightOverride = 0, int $textSizeOverride = 0, string $fontOverride = '')
     {
         try {
             $fullPath = trim($this->default_path, '/').'/'.$fileName;
@@ -57,19 +63,46 @@ class ProfilePicGenerator
             } else {
                 $height = $this->default_height;
             }
+            
+            if (!empty($textSizeOverride)) {
+                $size = $textSizeOverride;
+            } else {
+                $size = $this->default_text_size;
+            }
+            
+            if (!empty($fontOverride)) {
+                $font = $fontOverride;
+            } else {
+                $font = $this->default_font;
+            }
+            
             header("Content-Type: image/png");
             $image = imagecreate($width, $height);
             $background_color = imagecolorallocate($image, ...$backgroundColour);
             $text_color = imagecolorallocate($image, ...$textColour);
-            imagestring($image, 1, 5, 5,  $text, $text_color);
+            $imageCordinates = $this->generateTextCoordinates($font, $width, $height, $size, $text);       
+            imagettftext($image, $size, 0, $imageCordinates['x'], $imageCordinates['y'], $text_color, $font, $text);
             imagepng($image, $fullPath);
             imagedestroy($image);
+            
         } catch (\Exception $e) {
             print $e->getMessage(); 
             die();
         }
     }
  
+    private function generateTextCoordinates(string $font, int $imageWidth, int $imageHeight, int $textSize, string $text) : array
+    {
+        $centerX = $imageWidth / 2;
+        $centerY = $imageHeight / 2;
+        list($left, $bottom, $right, , , $top) = imageftbbox($textSize, 0, $font, $text);
+        $left_offset = ($right - $left) / 2;
+        $top_offset = ($bottom- $top) / 2;
+        $x = $centerX - $left_offset;
+        $y = $centerY + $top_offset;
+        return ['x' => $x, 'y' => $y];
+    }
+    
     private function hexCodeToRgb(string $hex) : array
     {
         $rgb = [];

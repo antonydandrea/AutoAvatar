@@ -15,6 +15,6 @@ $colourArray = [
     '#CD3700',
 ];
 
-$profilePic = new ProfilePicGenerator("pics", $colourArray, ['#FFF'], 70, 70);
+$profilePic = new ProfilePicGenerator("pics", $colourArray, ['#FFF'], 70, 70, 30, realpath("Replica-Regular.ttf"));
 $profilePic->generateNewImage(time().'.png', 'A');
 
