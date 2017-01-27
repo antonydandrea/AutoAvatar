@@ -1,13 +1,25 @@
 <?php
 /** 
- * 
+ * AutoAvatar
  */
 class AutoAvatar
 {
+    /** 
+     *
+     * @var string
+     */
     private $default_path;
     
+    /** 
+     *
+     * @var int
+     */
     private $default_width;
     
+    /** 
+     *
+     * @var int
+     */
     private $default_height;
     
     /**
@@ -17,12 +29,34 @@ class AutoAvatar
      */
     private $colour_array;
     
+    /** 
+     *
+     * @var array
+     */
     private $text_colour_array;
     
+    /** 
+     *
+     * @var string
+     */
     private $default_font;
     
+    /** 
+     *
+     * @var int
+     */
     private $default_text_size;
     
+    /** 
+     * 
+     * @param string $defaultPath
+     * @param array $colourArray
+     * @param array $textColourArray
+     * @param int $defaultWidth
+     * @param int $defaultHeight
+     * @param int $defaultTextSize
+     * @param string $defaultFont
+     */
     public function __construct(string $defaultPath, array $colourArray = [], array $textColourArray = [], int $defaultWidth = 70, int $defaultHeight = 70, int $defaultTextSize = 30, string $defaultFont = '')
     {
         $this->default_path = $defaultPath;
@@ -105,6 +139,15 @@ class AutoAvatar
         }
     }
  
+    /** 
+     * 
+     * @param string $font
+     * @param int $imageWidth
+     * @param int $imageHeight
+     * @param int $textSize
+     * @param string $text
+     * @return array
+     */
     private function generateTextCoordinates(string $font, int $imageWidth, int $imageHeight, int $textSize, string $text) : array
     {
         $centerX = $imageWidth / 2;
@@ -117,6 +160,12 @@ class AutoAvatar
         return ['x' => $x, 'y' => $y];
     }
     
+    /** 
+     * 
+     * @param string $hex
+     * @return array
+     * @throws \Exception
+     */
     private function hexCodeToRgb(string $hex) : array
     {
         $rgb = [];
@@ -135,6 +184,12 @@ class AutoAvatar
         return $rgb;
     }
     
+    /** 
+     * 
+     * @param string $hex
+     * @param bool $intKeys
+     * @return array
+     */
     private function splitHex(string $hex, bool $intKeys = true) : array
     {
         $splitHex = [];
@@ -152,6 +207,10 @@ class AutoAvatar
         return $splitHex;
     }
     
+    /** 
+     * 
+     * @return array
+     */
     private function generateRandomRGB() : array
     {
         return [
@@ -161,46 +220,82 @@ class AutoAvatar
         ];
     }
     
+    /** 
+     * 
+     * @return string
+     */
     public function getDefaultPath() : string
     {
         return $this->default_path;
     }
     
+    /** 
+     * 
+     * @return int
+     */
     public function getDefaultWidth() : int
     {
         return $this->default_width;
     }
     
+    /** 
+     * 
+     * @return int
+     */
     public function getDefaultHeight() : int
     {
         return $this->default_height;
     }
     
+    /** 
+     * 
+     * @return array
+     */
     public function getColourArray() : array
     {
         return $this->colour_array;
     }
     
+    /** 
+     * 
+     * @param string $defaultPath
+     */
     public function setDefaultPath(string $defaultPath)
     {
         $this->default_path = $defaultPath;
     }
     
+    /** 
+     * 
+     * @param int $defaultWidth
+     */
     public function setDefaultWidth(int $defaultWidth)
     {
         $this->default_width = $defaultWidth;
     }
-
+    
+    /** 
+     * 
+     * @param int $defaultHeight
+     */
     public function setDefaultHeight(int $defaultHeight)
     {
         $this->default_height = $defaultHeight;
     }
     
+    /** 
+     * 
+     * @param array $colourArray
+     */
     public function setColourArray(array $colourArray)
     {
         $this->colour_array($colourArray);
     }
     
+    /**
+     * 
+     * @param string $hex
+     */
     public function addColour(string $hex)
     {
         array_push($this->colour_array, $hex);
