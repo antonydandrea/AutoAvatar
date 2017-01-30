@@ -1,6 +1,8 @@
 <?php
 /** 
  * AutoAvatar
+ * 
+ * version 0.2
  */
 class AutoAvatar
 {
@@ -70,6 +72,7 @@ class AutoAvatar
  
     /** 
      * Saves image to the path configured in constructor.
+     * Returns an array of the chosen colours plus the text.
      * 
      * @param string $fileName
      * @param string $text
@@ -123,8 +126,6 @@ class AutoAvatar
             } else {
                 $font = $this->default_font;
             }
-            
-            header("Content-Type: image/png");
             $image = imagecreate($width, $height);
             $background_color = imagecolorallocate($image, ...$backgroundColour);
             $text_color = imagecolorallocate($image, ...$textColour);
@@ -132,7 +133,11 @@ class AutoAvatar
             imagettftext($image, $size, 0, $imageCordinates['x'], $imageCordinates['y'], $text_color, $font, $text);
             imagepng($image, $fullPath);
             imagedestroy($image);
-            
+            return [
+                'background'    => $this->rgbToHexCode($backgroundColour),
+                'text'          => $this->rgbToHexCode($textColour),
+                'content'       => $text
+            ];
         } catch (\Exception $e) {
             print $e->getMessage(); 
             die();
@@ -154,10 +159,24 @@ class AutoAvatar
         $centerY = $imageHeight / 2;
         list($left, $bottom, $right, , , $top) = imageftbbox($textSize, 0, $font, $text);
         $left_offset = ($right - $left) / 2;
-        $top_offset = ($bottom- $top) / 2;
+        $top_offset = ($bottom - $top) / 2;
         $x = $centerX - $left_offset;
         $y = $centerY + $top_offset;
         return ['x' => $x, 'y' => $y];
+    }
+    
+    /** 
+     * 
+     * @param array rgb
+     * @return string
+     */
+    private function rgbToHexCode(array $rgb) : string
+    {
+        $hex = '#';
+        foreach ($rgb as $colour) {
+            $hex .= dechex($colour);
+        }
+        return $hex;
     }
     
     /** 
