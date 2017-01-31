@@ -3,6 +3,7 @@ require_once('AutoAvatar/Autoloader.php');
 
 use AutoAvatar\ImageCompiler;
 use AutoAvatar\Image;
+use AutoAvatar\Text;
 
 $colourArray = [
     '#00BE4B',
@@ -19,11 +20,12 @@ $colourArray = [
 ];
 try {
     $image = new Image(70, 70, 'png');
+    $text = new Text('A', 30, realpath("DS-DIGI.ttf"));
 } catch (\Exception $e) {
     print $e->getMessage();
     die();
 }
-$profilePic = new ImageCompiler("pics", $colourArray, ['#FFF'], 30, realpath("DS-DIGI.ttf"));
-$imageInfo = $profilePic->compileImage(time().'.png', 'A', $image);
+$profilePic = new ImageCompiler("pics", $colourArray, ['#FFF']);
+$imageInfo = $profilePic->compileImage(time().'.png', $image, $text);
 
 var_dump($imageInfo);

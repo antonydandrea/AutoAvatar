@@ -2,11 +2,12 @@
 namespace AutoAvatar;
 
 use AutoAvatar\Image;
+use AutoAvatar\Text;
 
 /** 
  * AutoAvatar
  * 
- * version 0.4.0
+ * @package AutoAvatar
  */
 class ImageCompiler
 {
@@ -30,24 +31,6 @@ class ImageCompiler
     private $text_colour_array;
     
     /** 
-     *
-     * @var string
-     */
-    private $default_font;
-    
-    /** 
-     *
-     * @var int
-     */
-    private $default_text_size;
-    
-    /**  
-     * 
-     * @var string
-     */
-    private $default_format;
-    
-    /** 
      * 
      * @param string $defaultPath
      * @param array $colourArray
@@ -56,13 +39,11 @@ class ImageCompiler
      * @param string $defaultFont
      * @throws Exception
      */
-    public function __construct(string $defaultPath, array $colourArray = [], array $textColourArray = [], int $defaultTextSize = 30, string $defaultFont = '')
+    public function __construct(string $defaultPath, array $colourArray = [], array $textColourArray = [])
     {
         $this->default_path = $defaultPath;
         $this->colour_array = $colourArray;
         $this->text_colour_array = $textColourArray;
-        $this->default_font = $defaultFont;
-        $this->default_text_size = $defaultTextSize;
     }
  
     /** 
@@ -76,7 +57,7 @@ class ImageCompiler
      * @param int $textSizeOverride
      * @param string $fontOverride
      */
-    public function compileImage(string $fileName, string $text, Image $imageObj, string $colourOverride = '', string $textColourOverride = '', int $textSizeOverride = 0, string $fontOverride = '')
+    public function compileImage(string $fileName, Image $imageObj, Text $textObj, string $colourOverride = '', string $textColourOverride = '')
     {
         try {
             $fullPath = trim($this->default_path, '/').'/'.$fileName;
@@ -96,33 +77,21 @@ class ImageCompiler
                 $textColour = $this->generateRandomRGB();
             }
             
-            if (!empty($textSizeOverride)) {
-                $size = $textSizeOverride;
-            } else {
-                $size = $this->default_text_size;
-            }
-            
-            if (!empty($fontOverride)) {
-                $font = $fontOverride;
-            } else {
-                $font = $this->default_font;
-            }
-            
             $fullPath .= ".{$imageObj->getFormat()}";
             $image = imagecreate($imageObj->getWidth(), $imageObj->getHeight());
             $background_color = imagecolorallocate($image, ...$backgroundColour);
             $text_color = imagecolorallocate($image, ...$textColour);
-            $imageCordinates = $this->generateTextCoordinates($font, $imageObj->getWidth(), $imageObj->getHeight(), $size, $text);       
-            imagettftext($image, $size, 0, $imageCordinates['x'], $imageCordinates['y'], $text_color, $font, $text);
+            $imageCordinates = $this->generateTextCoordinates($textObj->getFont(), $imageObj->getWidth(), $imageObj->getHeight(), $textObj->getSize(), $textObj->getContent());       
+            imagettftext($image, $textObj->getSize(), 0, $imageCordinates['x'], $imageCordinates['y'], $text_color, $textObj->getFont(), $textObj->getContent());
             $imageWritten = $this->writeImage($image, $fullPath, $imageObj->getFormat());
             imagedestroy($image);
             if (!$imageWritten) {
                 throw new \Exception('Image write failed. Check file path permissions.');
             }
             return [
-                'background'    => $this->rgbToHexCode($backgroundColour),
-                'text'          => $this->rgbToHexCode($textColour),
-                'content'       => $text
+                'background_colour'     => $this->rgbToHexCode($backgroundColour),
+                'text_colour'           => $this->rgbToHexCode($textColour),
+                'content'               => $textObj->getContent()
             ];
         } catch (\Exception $e) {
             print $e->getMessage(); 
@@ -153,16 +122,6 @@ class ImageCompiler
                 break;
         }
         return $result;
-    }
-    
-    /** 
-     * 
-     * @param string $format
-     * @return bool
-     */
-    private function isFormatAllowed(string $format) : bool
-    {
-        return in_array($format, $this->allowed_formats);
     }
     
     /** 
