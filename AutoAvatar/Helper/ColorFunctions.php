@@ -1,6 +1,8 @@
 <?php
 namespace AutoAvatar\Helper;
 
+use AutoAvatar\Exception\ColorException;
+
 /** 
  * @package AutoAvatar\Helper
  */
@@ -15,7 +17,7 @@ class ColorFunctions
     {
         $hex = '#';
         foreach ($rgb as $color) {
-            $hex .= dechex($color);
+            $hex .= str_pad(dechex($color), 2, '0', 0);
         }
         return $hex;
     }
@@ -39,7 +41,7 @@ class ColorFunctions
                 $rgb[$color] = hexdec($hex);
             }
         } else {
-            throw new \Exception("Invalid Hex Code: ".$hex);
+            throw new ColorException("Invalid Hex Code: ".$hex);
         }
         return $rgb;
     }
