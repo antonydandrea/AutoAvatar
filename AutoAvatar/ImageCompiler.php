@@ -1,28 +1,20 @@
 <?php
+namespace AutoAvatar;
+
+use AutoAvatar\Image;
+
 /** 
  * AutoAvatar
  * 
- * version 0.3.0
+ * version 0.4.0
  */
-class AutoAvatar
+class ImageCompiler
 {
     /** 
      *
      * @var string
      */
     private $default_path;
-    
-    /** 
-     *
-     * @var int
-     */
-    private $default_width;
-    
-    /** 
-     *
-     * @var int
-     */
-    private $default_height;
     
     /**
      * An array of Hex codes.
@@ -49,12 +41,6 @@ class AutoAvatar
      */
     private $default_text_size;
     
-    /** 
-     *
-     * @var array
-     */
-    private $allowed_formats = ['png', 'jpeg', 'jpg', 'gif'];
-    
     /**  
      * 
      * @var string
@@ -66,26 +52,17 @@ class AutoAvatar
      * @param string $defaultPath
      * @param array $colourArray
      * @param array $textColourArray
-     * @param int $defaultWidth
-     * @param int $defaultHeight
      * @param int $defaultTextSize
      * @param string $defaultFont
      * @throws Exception
      */
-    public function __construct(string $defaultPath, array $colourArray = [], array $textColourArray = [], int $defaultWidth = 70, int $defaultHeight = 70, int $defaultTextSize = 30, string $defaultFont = '', string $defaultFormat = 'png')
+    public function __construct(string $defaultPath, array $colourArray = [], array $textColourArray = [], int $defaultTextSize = 30, string $defaultFont = '')
     {
         $this->default_path = $defaultPath;
-        $this->default_width = $defaultWidth;
-        $this->default_height = $defaultHeight;
         $this->colour_array = $colourArray;
         $this->text_colour_array = $textColourArray;
         $this->default_font = $defaultFont;
         $this->default_text_size = $defaultTextSize;
-        if ($this->isFormatAllowed($defaultFormat)) {
-            $this->default_format = $defaultFormat;
-        } else {
-            throw new \Exception('Unsupported image format: '.$defaultFormat.'. Supported: png, gif and jpeg.');
-        }
     }
  
     /** 
@@ -96,13 +73,10 @@ class AutoAvatar
      * @param string $text
      * @param string $colourOverride
      * @param string $textColourOverride
-     * @param int $widthOverride
-     * @param int $heightOverride
      * @param int $textSizeOverride
      * @param string $fontOverride
-     * @param string $formatOverride
      */
-    public function generateNewImage(string $fileName, string $text, string $colourOverride = '', string $textColourOverride = '', int $widthOverride = 0, int $heightOverride = 0, int $textSizeOverride = 0, string $fontOverride = '', string $formatOverride = '')
+    public function compileImage(string $fileName, string $text, Image $imageObj, string $colourOverride = '', string $textColourOverride = '', int $textSizeOverride = 0, string $fontOverride = '')
     {
         try {
             $fullPath = trim($this->default_path, '/').'/'.$fileName;
@@ -122,18 +96,6 @@ class AutoAvatar
                 $textColour = $this->generateRandomRGB();
             }
             
-            if (!empty($widthOverride)) {
-                $width = $widthOverride;
-            } else {
-                $width = $this->default_width;
-            }
-            
-            if (!empty($heightOverride)) {
-                $height = $heightOverride;
-            } else {
-                $height = $this->default_height;
-            }
-            
             if (!empty($textSizeOverride)) {
                 $size = $textSizeOverride;
             } else {
@@ -146,22 +108,13 @@ class AutoAvatar
                 $font = $this->default_font;
             }
             
-            if (!empty($formatOverride)) {                
-                if ($this->isFormatAllowed($formatOverride)) {
-                    $format = $formatOverride;
-                } else {
-                    throw new \Exception('Unsupported image format: '.$defaultFormat.'. Supported: png, gif and jpeg.');
-                }
-            } else {
-                $format = $this->default_format;
-            }
-            $fullPath .= ".$format";
-            $image = imagecreate($width, $height);
+            $fullPath .= ".{$imageObj->getFormat()}";
+            $image = imagecreate($imageObj->getWidth(), $imageObj->getHeight());
             $background_color = imagecolorallocate($image, ...$backgroundColour);
             $text_color = imagecolorallocate($image, ...$textColour);
-            $imageCordinates = $this->generateTextCoordinates($font, $width, $height, $size, $text);       
+            $imageCordinates = $this->generateTextCoordinates($font, $imageObj->getWidth(), $imageObj->getHeight(), $size, $text);       
             imagettftext($image, $size, 0, $imageCordinates['x'], $imageCordinates['y'], $text_color, $font, $text);
-            $imageWritten = $this->writeImage($image, $fullPath, $format);
+            $imageWritten = $this->writeImage($image, $fullPath, $imageObj->getFormat());
             imagedestroy($image);
             if (!$imageWritten) {
                 throw new \Exception('Image write failed. Check file path permissions.');

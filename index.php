@@ -1,5 +1,8 @@
 <?php
-require_once('src/AutoAvatar.php');
+require_once('AutoAvatar/Autoloader.php');
+
+use AutoAvatar\ImageCompiler;
+use AutoAvatar\Image;
 
 $colourArray = [
     '#00BE4B',
@@ -14,8 +17,13 @@ $colourArray = [
     '#00B9FA',
     '#CD3700',
 ];
-
-$profilePic = new AutoAvatar("pics", $colourArray, ['#FFF'], 70, 70, 30, realpath("DS-DIGI.ttf"), 'jpeg');
-$imageInfo = $profilePic->generateNewImage(time().'.png', 'A');
+try {
+    $image = new Image(70, 70, 'png');
+} catch (\Exception $e) {
+    print $e->getMessage();
+    die();
+}
+$profilePic = new ImageCompiler("pics", $colourArray, ['#FFF'], 30, realpath("DS-DIGI.ttf"));
+$imageInfo = $profilePic->compileImage(time().'.png', 'A', $image);
 
 var_dump($imageInfo);
