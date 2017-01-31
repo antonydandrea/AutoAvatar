@@ -5,7 +5,7 @@ use AutoAvatar\ImageCompiler;
 use AutoAvatar\Image;
 use AutoAvatar\Text;
 
-$colourArray = [
+$colorArray = [
     '#00BE4B',
     '#003C87',
     '#FF649B',
@@ -25,7 +25,7 @@ try {
     print $e->getMessage();
     die();
 }
-$profilePic = new ImageCompiler("pics", $colourArray, ['#FFF']);
+$profilePic = new ImageCompiler("pics", $colorArray, ['#FFF']);
 $imageInfo = $profilePic->compileImage(time().'.png', $image, $text);
 
 var_dump($imageInfo);

@@ -3,6 +3,7 @@ namespace AutoAvatar;
 
 use AutoAvatar\Image;
 use AutoAvatar\Text;
+use AutoAvatar\Helper\ColorFunctions;
 
 /** 
  * AutoAvatar
@@ -12,6 +13,11 @@ use AutoAvatar\Text;
 class ImageCompiler
 {
     /** 
+     * @var AutoAvatar\Helper\ColorFunctions
+     */
+    private $colour_helper;
+    
+    /** 
      *
      * @var string
      */
@@ -19,68 +25,68 @@ class ImageCompiler
     
     /**
      * An array of Hex codes.
-     * If set, the background colours will be randomly chosen from this array. 
+     * If set, the background colors will be randomly chosen from this array. 
      * @var array
      */
-    private $colour_array;
+    private $color_array;
     
     /** 
      *
      * @var array
      */
-    private $text_colour_array;
+    private $text_color_array;
     
     /** 
      * 
      * @param string $defaultPath
-     * @param array $colourArray
-     * @param array $textColourArray
+     * @param array $colorArray
+     * @param array $textcolorArray
      * @param int $defaultTextSize
-     * @param string $defaultFont
      * @throws Exception
      */
-    public function __construct(string $defaultPath, array $colourArray = [], array $textColourArray = [])
+    public function __construct(string $defaultPath, array $colorArray = [], array $textcolorArray = [])
     {
         $this->default_path = $defaultPath;
-        $this->colour_array = $colourArray;
-        $this->text_colour_array = $textColourArray;
+        $this->color_array = $colorArray;
+        $this->text_color_array = $textcolorArray;
+        $this->colour_helper = new ColorFunctions;
     }
  
     /** 
      * Saves image to the path configured in constructor.
-     * Returns an array of the chosen colours plus the text.
+     * Returns an array of the chosen colors plus the text.
      * 
      * @param string $fileName
      * @param string $text
-     * @param string $colourOverride
-     * @param string $textColourOverride
+     * @param string $colorOverride
+     * @param string $textcolorOverride
      * @param int $textSizeOverride
      * @param string $fontOverride
      */
-    public function compileImage(string $fileName, Image $imageObj, Text $textObj, string $colourOverride = '', string $textColourOverride = '')
+    public function compileImage(string $fileName, Image $imageObj, Text $textObj, string $colorOverride = '', string $textcolorOverride = '')
     {
         try {
             $fullPath = trim($this->default_path, '/').'/'.$fileName;
-            if (!empty($colourOverride)) {
-                $backgroundColour = $this->hexCodeToRgb($colourOverride);
-            } elseif (!empty($this->colour_array)) {
-                $backgroundColour = $this->hexCodeToRgb($this->colour_array[rand(0, (count($this->colour_array) - 1))]);
+            if (!empty($colorOverride)) {
+                $backgroundcolor = $this->colour_helper->hexCodeToRgb($colorOverride);
+            } elseif (!empty($this->color_array)) {
+                $backgroundcolor = $this->colour_helper->hexCodeToRgb($this->color_array[rand(0, (count($this->color_array) - 1))]);
             } else {
-                $backgroundColour = $this->generateRandomRGB();
+                $backgroundcolor = $this->colour_helper->generateRandomRGB();
             }
             
-            if (!empty($textColourOverride)) {
-                $textColour = $this->hexCodeToRgb($textColourOverride);
-            } elseif (!empty($this->text_colour_array)) {
-                $textColour = $this->hexCodeToRgb($this->text_colour_array[rand(0, (count($this->text_colour_array) - 1))]);
+            if (!empty($textcolorOverride)) {
+                $textcolor = $this->colour_helper->hexCodeToRgb($textcolorOverride);
+            } elseif (!empty($this->text_color_array)) {
+                $textcolor = $this->colour_helper->hexCodeToRgb($this->text_color_array[rand(0, (count($this->text_color_array) - 1))]);
             } else {
-                $textColour = $this->generateRandomRGB();
+                $textcolor = $this->colour_helper->generateRandomRGB();
             }
             
             $fullPath .= ".{$imageObj->getFormat()}";
             $image = imagecreate($imageObj->getWidth(), $imageObj->getHeight());
-            $background_color = imagecolorallocate($image, ...$backgroundColour);
-            $text_color = imagecolorallocate($image, ...$textColour);
+            $background_color = imagecolorallocate($image, ...$backgroundcolor);
+            $text_color = imagecolorallocate($image, ...$textcolor);
             $imageCordinates = $this->generateTextCoordinates($textObj->getFont(), $imageObj->getWidth(), $imageObj->getHeight(), $textObj->getSize(), $textObj->getContent());       
             imagettftext($image, $textObj->getSize(), 0, $imageCordinates['x'], $imageCordinates['y'], $text_color, $textObj->getFont(), $textObj->getContent());
             $imageWritten = $this->writeImage($image, $fullPath, $imageObj->getFormat());
@@ -89,8 +95,8 @@ class ImageCompiler
                 throw new \Exception('Image write failed. Check file path permissions.');
             }
             return [
-                'background_colour'     => $this->rgbToHexCode($backgroundColour),
-                'text_colour'           => $this->rgbToHexCode($textColour),
+                'background_color'     => $this->colour_helper->rgbToHexCode($backgroundcolor),
+                'text_color'           => $this->colour_helper->rgbToHexCode($textcolor),
                 'content'               => $textObj->getContent()
             ];
         } catch (\Exception $e) {
@@ -147,80 +153,6 @@ class ImageCompiler
     
     /** 
      * 
-     * @param array rgb
-     * @return string
-     */
-    private function rgbToHexCode(array $rgb) : string
-    {
-        $hex = '#';
-        foreach ($rgb as $colour) {
-            $hex .= dechex($colour);
-        }
-        return $hex;
-    }
-    
-    /** 
-     * 
-     * @param string $hex
-     * @return array
-     * @throws \Exception
-     */
-    private function hexCodeToRgb(string $hex) : array
-    {
-        $rgb = [];
-        $cleanHex = trim($hex, '#');
-        if (strlen($cleanHex) === 3) {
-            $cleanHex .= $cleanHex;
-        }
-        $hexArray = $this->splitHex($cleanHex);
-        if (count($hexArray) === 3) {
-            foreach ($hexArray as $colour => $hex) {
-                $rgb[$colour] = hexdec($hex);
-            }
-        } else {
-            throw new \Exception("Invalid Hex Code: ".$hex);
-        }
-        return $rgb;
-    }
-    
-    /** 
-     * 
-     * @param string $hex
-     * @param bool $intKeys
-     * @return array
-     */
-    private function splitHex(string $hex, bool $intKeys = true) : array
-    {
-        $splitHex = [];
-        $cleanHex = trim($hex, '#');
-        $matched = preg_match('/(?<red>[0-9A-F]{2})(?<green>[0-9A-F]{2})(?<blue>[0-9A-F]{2})/', $cleanHex, $hexArray);
-        if ($matched) {
-            foreach (array_slice($hexArray, 1) as $key => $value) {
-                if (!$intKeys && is_string($key)) {
-                    $splitHex[$key] = $value;
-                } elseif ($intKeys && is_int($key)) {
-                    $splitHex[$key] = $value;
-                }
-            }
-        }
-        return $splitHex;
-    }
-    
-    /** 
-     * 
-     * @return array
-     */
-    private function generateRandomRGB() : array
-    {
-        return [
-            "red"   => rand(0, 255),
-            "green" => rand(0, 255),
-            "blue"  => rand(0, 255)
-        ];
-    }
-    
-    /** 
-     * 
      * @return string
      */
     public function getDefaultPath() : string
@@ -230,29 +162,11 @@ class ImageCompiler
     
     /** 
      * 
-     * @return int
-     */
-    public function getDefaultWidth() : int
-    {
-        return $this->default_width;
-    }
-    
-    /** 
-     * 
-     * @return int
-     */
-    public function getDefaultHeight() : int
-    {
-        return $this->default_height;
-    }
-    
-    /** 
-     * 
      * @return array
      */
-    public function getColourArray() : array
+    public function getcolorArray() : array
     {
-        return $this->colour_array;
+        return $this->color_array;
     }
     
     /** 
@@ -263,40 +177,22 @@ class ImageCompiler
     {
         $this->default_path = $defaultPath;
     }
-    
+        
     /** 
      * 
-     * @param int $defaultWidth
+     * @param array $colorArray
      */
-    public function setDefaultWidth(int $defaultWidth)
+    public function setcolorArray(array $colorArray)
     {
-        $this->default_width = $defaultWidth;
-    }
-    
-    /** 
-     * 
-     * @param int $defaultHeight
-     */
-    public function setDefaultHeight(int $defaultHeight)
-    {
-        $this->default_height = $defaultHeight;
-    }
-    
-    /** 
-     * 
-     * @param array $colourArray
-     */
-    public function setColourArray(array $colourArray)
-    {
-        $this->colour_array($colourArray);
+        $this->color_array($colorArray);
     }
     
     /**
      * 
      * @param string $hex
      */
-    public function addColour(string $hex)
+    public function addcolor(string $hex)
     {
-        array_push($this->colour_array, $hex);
+        array_push($this->color_array, $hex);
     }
 }
