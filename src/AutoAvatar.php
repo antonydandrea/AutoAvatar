@@ -2,7 +2,7 @@
 /** 
  * AutoAvatar
  * 
- * version 0.2
+ * version 0.3.0
  */
 class AutoAvatar
 {
@@ -50,6 +50,18 @@ class AutoAvatar
     private $default_text_size;
     
     /** 
+     *
+     * @var array
+     */
+    private $allowed_formats = ['png', 'jpeg', 'jpg', 'gif'];
+    
+    /**  
+     * 
+     * @var string
+     */
+    private $default_format;
+    
+    /** 
      * 
      * @param string $defaultPath
      * @param array $colourArray
@@ -58,8 +70,9 @@ class AutoAvatar
      * @param int $defaultHeight
      * @param int $defaultTextSize
      * @param string $defaultFont
+     * @throws Exception
      */
-    public function __construct(string $defaultPath, array $colourArray = [], array $textColourArray = [], int $defaultWidth = 70, int $defaultHeight = 70, int $defaultTextSize = 30, string $defaultFont = '')
+    public function __construct(string $defaultPath, array $colourArray = [], array $textColourArray = [], int $defaultWidth = 70, int $defaultHeight = 70, int $defaultTextSize = 30, string $defaultFont = '', string $defaultFormat = 'png')
     {
         $this->default_path = $defaultPath;
         $this->default_width = $defaultWidth;
@@ -68,6 +81,11 @@ class AutoAvatar
         $this->text_colour_array = $textColourArray;
         $this->default_font = $defaultFont;
         $this->default_text_size = $defaultTextSize;
+        if ($this->isFormatAllowed($defaultFormat)) {
+            $this->default_format = $defaultFormat;
+        } else {
+            throw new \Exception('Unsupported image format: '.$defaultFormat.'. Supported: png, gif and jpeg.');
+        }
     }
  
     /** 
@@ -82,8 +100,9 @@ class AutoAvatar
      * @param int $heightOverride
      * @param int $textSizeOverride
      * @param string $fontOverride
+     * @param string $formatOverride
      */
-    public function generateNewImage(string $fileName, string $text, string $colourOverride = '', string $textColourOverride = '', int $widthOverride = 0, int $heightOverride = 0, int $textSizeOverride = 0, string $fontOverride = '')
+    public function generateNewImage(string $fileName, string $text, string $colourOverride = '', string $textColourOverride = '', int $widthOverride = 0, int $heightOverride = 0, int $textSizeOverride = 0, string $fontOverride = '', string $formatOverride = '')
     {
         try {
             $fullPath = trim($this->default_path, '/').'/'.$fileName;
@@ -126,13 +145,27 @@ class AutoAvatar
             } else {
                 $font = $this->default_font;
             }
+            
+            if (!empty($formatOverride)) {                
+                if ($this->isFormatAllowed($formatOverride)) {
+                    $format = $formatOverride;
+                } else {
+                    throw new \Exception('Unsupported image format: '.$defaultFormat.'. Supported: png, gif and jpeg.');
+                }
+            } else {
+                $format = $this->default_format;
+            }
+            $fullPath .= ".$format";
             $image = imagecreate($width, $height);
             $background_color = imagecolorallocate($image, ...$backgroundColour);
             $text_color = imagecolorallocate($image, ...$textColour);
             $imageCordinates = $this->generateTextCoordinates($font, $width, $height, $size, $text);       
             imagettftext($image, $size, 0, $imageCordinates['x'], $imageCordinates['y'], $text_color, $font, $text);
-            imagepng($image, $fullPath);
+            $imageWritten = $this->writeImage($image, $fullPath, $format);
             imagedestroy($image);
+            if (!$imageWritten) {
+                throw new \Exception('Image write failed. Check file path permissions.');
+            }
             return [
                 'background'    => $this->rgbToHexCode($backgroundColour),
                 'text'          => $this->rgbToHexCode($textColour),
@@ -144,6 +177,41 @@ class AutoAvatar
         }
     }
  
+    /** 
+     * 
+     * @param $image
+     * @param string $fullPath
+     * @param string $format
+     * @return bool
+     */
+    private function writeImage($image, string $fullPath, string $format) : bool
+    {
+        $result = false;
+        switch($format) {
+            case 'png':
+                $result = imagepng($image, $fullPath);
+                break;
+            case 'jpg':
+            case 'jpeg':
+                $result = imagejpeg($image, $fullPath);
+                break;
+            case 'gif':
+                $result = imagegif($image, $fullPath);
+                break;
+        }
+        return $result;
+    }
+    
+    /** 
+     * 
+     * @param string $format
+     * @return bool
+     */
+    private function isFormatAllowed(string $format) : bool
+    {
+        return in_array($format, $this->allowed_formats);
+    }
+    
     /** 
      * 
      * @param string $font

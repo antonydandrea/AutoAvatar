@@ -15,7 +15,7 @@ $colourArray = [
     '#CD3700',
 ];
 
-$profilePic = new AutoAvatar("pics", $colourArray, ['#FFF'], 70, 70, 30, realpath("DS-DIGI.ttf"));
+$profilePic = new AutoAvatar("pics", $colourArray, ['#FFF'], 70, 70, 30, realpath("DS-DIGI.ttf"), 'jpeg');
 $imageInfo = $profilePic->generateNewImage(time().'.png', 'A');
 
 var_dump($imageInfo);
