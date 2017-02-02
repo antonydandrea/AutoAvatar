@@ -1,5 +1,5 @@
 <?php
-require_once('AutoAvatar/Autoloader.php');
+require_once('src/vendor/autoload.php');
 
 use AutoAvatar\ImageCompiler;
 use AutoAvatar\Image;
