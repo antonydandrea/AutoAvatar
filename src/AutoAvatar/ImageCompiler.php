@@ -47,49 +47,45 @@ class ImageCompiler
      * @param string $textcolorOverride
      * @param int $textSizeOverride
      * @param string $fontOverride
+     * @throws \Exception
      */
     public function compileImage(string $fileName, Image $imageObj, Text $textObj, string $colorOverride = '', string $textcolorOverride = '')
     {
-        try {
-            $fullPath = trim($this->default_path, '/').'/'.$fileName;
-            
-            if (!empty($colorOverride)) {
-                $backgroundcolor = $this->color_helper->hexCodeToRgb($colorOverride);
-            } else {
-                $backgroundcolor = $imageObj->getRandomColor();
-            }
-            
-            if (!empty($textcolorOverride)) {
-                $textcolor = $this->color_helper->hexCodeToRgb($textcolorOverride);
-            } else {
-                $textcolor = $textObj->getRandomColor();
-            }
-            
-            $fullPath .= ".{$imageObj->getFormat()}";
-            
-            $image = imagecreate($imageObj->getWidth(), $imageObj->getHeight());
-           
-            $background_color = imagecolorallocate($image, ...$backgroundcolor);
-            $text_color = imagecolorallocate($image, ...$textcolor);
-            
-            $textCordinates = $this->generateTextCoordinates($textObj->getFont(), $imageObj->getWidth(), $imageObj->getHeight(), $textObj->getSize(), $textObj->getContent());       
-            imagettftext($image, $textObj->getSize(), 0, $textCordinates['x'], $textCordinates['y'], $text_color, $textObj->getFont(), $textObj->getContent());
-            
-            $imageWritten = $this->writeImage($image, $fullPath, $imageObj->getFormat());
-            imagedestroy($image);
-            
-            if (!$imageWritten) {
-                throw new \Exception('Image write failed. Check file path permissions.');
-            }
-            return [
-                'background_color'      => $this->color_helper->rgbToHexCode($backgroundcolor),
-                'text_color'            => $this->color_helper->rgbToHexCode($textcolor),
-                'content'               => $textObj->getContent()
-            ];
-        } catch (\Exception $e) {
-            print $e->getMessage(); 
-            die();
+        $fullPath = trim($this->default_path, '/').'/'.$fileName;
+
+        if (!empty($colorOverride)) {
+            $backgroundcolor = $this->color_helper->hexCodeToRgb($colorOverride);
+        } else {
+            $backgroundcolor = $imageObj->getRandomColor();
         }
+
+        if (!empty($textcolorOverride)) {
+            $textcolor = $this->color_helper->hexCodeToRgb($textcolorOverride);
+        } else {
+            $textcolor = $textObj->getRandomColor();
+        }
+
+        $fullPath .= ".{$imageObj->getFormat()}";
+
+        $image = imagecreate($imageObj->getWidth(), $imageObj->getHeight());
+
+        $background_color = imagecolorallocate($image, ...$backgroundcolor);
+        $text_color = imagecolorallocate($image, ...$textcolor);
+
+        $textCordinates = $this->generateTextCoordinates($textObj->getFont(), $imageObj->getWidth(), $imageObj->getHeight(), $textObj->getSize(), $textObj->getContent());       
+        imagettftext($image, $textObj->getSize(), 0, $textCordinates['x'], $textCordinates['y'], $text_color, $textObj->getFont(), $textObj->getContent());
+
+        $imageWritten = $this->writeImage($image, $fullPath, $imageObj->getFormat());
+        imagedestroy($image);
+
+        if (!$imageWritten) {
+            throw new \Exception('Image write failed ('.$fullPath.'). Check file path permissions.');
+        }
+        return [
+            'background_color'      => $this->color_helper->rgbToHexCode($backgroundcolor),
+            'text_color'            => $this->color_helper->rgbToHexCode($textcolor),
+            'content'               => $textObj->getContent()
+        ];
     }
  
     /** 

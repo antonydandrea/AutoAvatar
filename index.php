@@ -21,13 +21,14 @@ $colorArray = [
 try {
     $image = new Image(70, 70, 'png', $colorArray);
     $text = new Text('A', 30, realpath("DS-DIGI.ttf"), ['#FFF']);
+ 
+    $profilePic = new ImageCompiler("pics");
+    $imageInfo = $profilePic->compileImage(time().'.png', $image, $text, '#FAD705', "000000");
+    $imageInfo2 = $profilePic->compileImage(time().'_2.png', $image, $text);
+
+    var_dump($imageInfo);
+    var_dump($imageInfo2);
 } catch (\Exception $e) {
     print $e->getMessage();
     die();
 }
-$profilePic = new ImageCompiler("pics");
-$imageInfo = $profilePic->compileImage(time().'.png', $image, $text, '#FAD705', "000000");
-$imageInfo2 = $profilePic->compileImage(time().'_2.png', $image, $text);
-
-var_dump($imageInfo);
-var_dump($imageInfo2);
