@@ -51,7 +51,7 @@ class ImageCompiler
      */
     public function compileImage(string $fileName, Image $imageObj, Text $textObj, string $colorOverride = '', string $textcolorOverride = '')
     {
-        $fullPath = trim($this->default_path, '/').'/'.$fileName;
+        $fullPath = rtrim($this->default_path, '/').'/'.$fileName;
 
         if (!empty($colorOverride)) {
             $backgroundcolor = $this->color_helper->hexCodeToRgb($colorOverride);
