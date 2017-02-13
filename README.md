@@ -9,8 +9,8 @@ A small library to auto generate images that can by used for profile pictures pl
 - Composer for auto loading
 
 ### Installation
-Run  composer dumpautoload -d src/ from inside the plugin root.
-Add require_once('/path/to/plugin/src/vendor/autoload.php'), to project.
+- Run  composer dumpautoload -d src/ from inside the plugin root.
+- Add require_once('/path/to/plugin/src/vendor/autoload.php'), to project.
 
 ### TODO
  - Proper usage documentation (for now use index.php as an example).

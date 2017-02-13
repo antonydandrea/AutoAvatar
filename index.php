@@ -18,6 +18,7 @@ $colorArray = [
     '#00B9FA',
     '#CD3700',
 ];
+
 try {
     $image = new Image(70, 70, 'png', $colorArray);
     $text = new Text('A', 30, realpath("DS-DIGI.ttf"), ['#FFF']);
