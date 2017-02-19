@@ -8,13 +8,16 @@ use AutoAvatar\Exception\ColorException;
  */
 class ColorFunctions
 {
-    /** 
-     * 
+    /**
      * @param array rgb
      * @return string
+     * @throws ColorException
      */
     public function rgbToHexCode(array $rgb) : string
     {
+        if (!$this->isRGBValid($rgb)) {
+            throw new ColorException("Invalid RGB Array: ". implode(', ', $rgb));
+        }
         $hex = '#';
         foreach ($rgb as $color) {
             $hex .= str_pad(dechex($color), 2, '0', 0);
@@ -26,7 +29,7 @@ class ColorFunctions
      * 
      * @param string $hex
      * @return array
-     * @throws \Exception
+     * @throws ColorException
      */
     public function hexCodeToRgb(string $hex) : array
     {
@@ -80,5 +83,20 @@ class ColorFunctions
             "green" => rand(0, 255),
             "blue"  => rand(0, 255)
         ];
+    }
+    
+    /** 
+     * @param array $rgb
+     * @return bool
+     */
+    public function isRGBValid(array $rgb) : bool
+    {
+        $valid = false;
+        if (count($rgb) === 3) {
+            if (max($rgb) <= 255 && min($rgb) >= 0) {
+                $valid = true;
+            }
+        }
+        return $valid;
     }
 }
